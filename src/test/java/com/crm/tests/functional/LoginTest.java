@@ -6,6 +6,7 @@ import com.crm.tests.base.BaseTest;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import org.testng.asserts.SoftAssert;
 
 /**
  * Functional tests for the CRM Login module.
@@ -16,6 +17,11 @@ public class LoginTest extends BaseTest {
 
     // ─── Data Providers ───────────────────────────────────────────────────────
 
+    /**
+     * Invalid credential scenarios for negative testing.
+     * Columns: username, password, expected error message fragment.
+     * These are intentionally wrong values — keeping them inline is appropriate.
+     */
     @DataProvider(name = "invalidCredentials")
     public Object[][] invalidCredentials() {
         return new Object[][] {
@@ -26,12 +32,19 @@ public class LoginTest extends BaseTest {
         };
     }
 
+    /**
+     * Multi-role login scenarios.
+     * Credentials are loaded from config so environment-specific values
+     * (QA vs Staging) can be supplied via config-{env}.properties or
+     * -D system properties without touching test code.
+     * Columns: username key, password key, display role name.
+     */
     @DataProvider(name = "validUsers", parallel = true)
     public Object[][] validUsers() {
         return new Object[][] {
-            {"admin@crm.com",   "Admin@123",  "Administrator"},
-            {"sales@crm.com",   "Sales@123",  "Sales Rep"},
-            {"manager@crm.com", "Mgr@123",    "Sales Manager"},
+            {config.get("admin.username"),   config.get("admin.password"),   "Administrator"},
+            {config.get("sales.username"),   config.get("sales.password"),   "Sales Rep"},
+            {config.get("manager.username"), config.get("manager.password"), "Sales Manager"},
         };
     }
 
@@ -56,10 +69,13 @@ public class LoginTest extends BaseTest {
         LoginPage loginPage = new LoginPage();
         loginPage.submitInvalidLogin(username, password);
 
-        Assert.assertTrue(loginPage.isErrorDisplayed(),
+        SoftAssert softAssert = new SoftAssert();
+        softAssert.assertTrue(loginPage.isErrorDisplayed(),
                 "Error message should be displayed for: " + username);
-        Assert.assertTrue(loginPage.getErrorMessage().contains(expectedError),
+        softAssert.assertTrue(loginPage.getErrorMessage().contains(expectedError),
                 "Error message mismatch. Expected to contain: " + expectedError);
+        softAssert.assertAll();
+
         extentTest.pass("Correct error shown for invalid credentials: " + username);
     }
 
@@ -69,10 +85,13 @@ public class LoginTest extends BaseTest {
     public void testMultipleUserRoleLogin(String email, String password, String role) {
         DashboardPage dashboard = new LoginPage().loginAs(email, password);
 
-        Assert.assertTrue(dashboard.isDashboardLoaded(),
+        SoftAssert softAssert = new SoftAssert();
+        softAssert.assertTrue(dashboard.isDashboardLoaded(),
                 role + " should reach dashboard after login");
-        Assert.assertTrue(dashboard.getWelcomeText().length() > 0,
-                "Welcome text should be present");
+        softAssert.assertFalse(dashboard.getWelcomeText().isEmpty(),
+                "Welcome text should be present for " + role);
+        softAssert.assertAll();
+
         extentTest.pass(role + " login verified");
     }
 

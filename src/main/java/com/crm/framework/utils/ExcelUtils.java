@@ -47,7 +47,12 @@ public class ExcelUtils {
             }
 
             int totalRows = sheet.getLastRowNum();    // 0-indexed; row 0 = header
-            int totalCols = sheet.getRow(0).getLastCellNum();
+            Row headerRow = sheet.getRow(0);
+            if (headerRow == null) {
+                throw new ExcelReaderException(
+                    "Sheet '" + sheetName + "' is empty (no header row) in: " + filePath);
+            }
+            int totalCols = headerRow.getLastCellNum();
 
             for (int rowIdx = 1; rowIdx <= totalRows; rowIdx++) {
                 Row row = sheet.getRow(rowIdx);
@@ -80,7 +85,12 @@ public class ExcelUtils {
                 throw new ExcelReaderException(
                     "Sheet '" + sheetName + "' not found in: " + filePath);
             }
-            return String.valueOf(getCellValue(sheet.getRow(row).getCell(col)));
+            Row dataRow = sheet.getRow(row);
+            if (dataRow == null) {
+                throw new ExcelReaderException(
+                    "Row " + row + " not found in sheet '" + sheetName + "'");
+            }
+            return String.valueOf(getCellValue(dataRow.getCell(col)));
 
         } catch (IOException e) {
             throw new ExcelReaderException(

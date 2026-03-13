@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+
+<!--
+  Regression suite: runs ALL regression-tagged tests.
+  Uses parallel="classes" so each test class runs in its own thread.
+  thread-count should match available CPU cores on CI agent.
+-->
+<suite name="CRM Regression Suite" parallel="classes" thread-count="4" verbose="1">
+
+    <listeners>
+        <listener class-name="com.crm.framework.listeners.RetryListener"/>
+    </listeners>
+
+    <test name="Login Regression">
+        <groups>
+            <run>
+                <include name="regression"/>
+            </run>
+        </groups>
+        <classes>
+            <class name="com.crm.tests.functional.LoginTest"/>
+        </classes>
+    </test>
+
+    <test name="Contacts Regression">
+        <groups>
+            <run>
+                <include name="regression"/>
+            </run>
+        </groups>
+        <classes>
+            <class name="com.crm.tests.functional.ContactsTest"/>
+        </classes>
+    </test>
+
+    <test name="Leads Regression">
+        <groups>
+            <run>
+                <include name="regression"/>
+            </run>
+        </groups>
+        <classes>
+            <class name="com.crm.tests.functional.LeadsTest"/>
+        </classes>
+    </test>
+
+</suite>

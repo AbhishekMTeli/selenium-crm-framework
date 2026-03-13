@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+
+<!--
+  Parallel suite: runs tests in parallel by METHODS across 5 threads.
+  ThreadLocal in DriverManager ensures each thread gets its own WebDriver.
+-->
+<suite name="CRM Parallel Suite" parallel="methods" thread-count="5" verbose="1">
+
+    <listeners>
+        <listener class-name="com.crm.framework.listeners.RetryListener"/>
+    </listeners>
+
+    <test name="All Tests - Parallel">
+        <classes>
+            <class name="com.crm.tests.functional.LoginTest"/>
+            <class name="com.crm.tests.functional.ContactsTest"/>
+            <class name="com.crm.tests.functional.LeadsTest"/>
+        </classes>
+    </test>
+
+</suite>
